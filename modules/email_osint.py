@@ -71,6 +71,7 @@ async def check_registered_services(email: str) -> dict[str, dict[str, Any]]:
     """Holehe mantığıyla popüler servislerde e-posta kayıt durumunu denetler."""
     results: dict[str, dict[str, Any]] = {}
     clean_email = email.strip().lower()
+    username = clean_email.split("@")[0]
     headers = dict(DEFAULT_HEADERS)
 
     async with httpx.AsyncClient(headers=headers, timeout=6.0) as client:
@@ -88,36 +89,7 @@ async def check_registered_services(email: str) -> dict[str, dict[str, Any]]:
             except Exception:
                 return {"registered": False, "details": "Kontrol edilemedi"}
 
-        # 2. Gravatar (WordPress)
-        async def _check_gravatar():
-            try:
-                md5_hash = hashlib.md5(clean_email.encode()).hexdigest()
-                url = f"https://gravatar.com/avatar/{md5_hash}?d=404"
-                resp = await client.get(url, follow_redirects=True)
-                has_avatar = resp.status_code == 200
-                return {
-                    "registered": has_avatar,
-                    "details": f"Avatar/Profil mevcut (MD5: {md5_hash[:10]}...)" if has_avatar else "Kayıt bulunamadı",
-                }
-            except Exception:
-                return {"registered": False, "details": "Kontrol edilemedi"}
-
-        # 3. Duolingo
-        async def _check_duolingo():
-            try:
-                url = f"https://www.duolingo.com/2017-06-30/users?email={clean_email}"
-                resp = await client.get(url)
-                if resp.status_code == 200:
-                    users = resp.json().get("users", [])
-                    if users:
-                        u = users[0]
-                        username = u.get("username", "bilinmiyor")
-                        return {"registered": True, "details": f"Kullanıcı adı: @{username}"}
-                return {"registered": False, "details": "Kayıt bulunamadı"}
-            except Exception:
-                return {"registered": False, "details": "Kontrol edilemedi"}
-
-        # 4. Microsoft / Office365
+        # 2. Microsoft / Office365
         async def _check_microsoft():
             try:
                 url = "https://login.microsoftonline.com/common/GetCredentialType"
@@ -131,21 +103,103 @@ async def check_registered_services(email: str) -> dict[str, dict[str, Any]]:
             except Exception:
                 return {"registered": False, "details": "Kontrol edilemedi"}
 
-        # 5. GitHub Public Email
+        # 3. GitHub (Commits & User Search)
         async def _check_github():
             try:
-                url = f"https://api.github.com/search/users?q={clean_email}+in:email"
-                resp = await client.get(url)
-                if resp.status_code == 200:
-                    count = resp.json().get("total_count", 0)
-                    if count > 0:
-                        login = resp.json()["items"][0].get("login", "")
-                        return {"registered": True, "details": f"GitHub profili: @{login}"}
-                return {"registered": False, "details": "Açık profil bulunamadı"}
+                commit_url = f"https://api.github.com/search/commits?q=author-email:{clean_email}"
+                r_c = await client.get(commit_url, headers={"Accept": "application/vnd.github.cloak-preview"})
+                if r_c.status_code == 200:
+                    cnt = r_c.json().get("total_count", 0)
+                    if cnt > 0:
+                        author_name = r_c.json()["items"][0]["commit"]["author"]["name"]
+                        return {"registered": True, "details": f"{cnt} açık commit bulundu (Yazar: {author_name})"}
+
+                user_url = f"https://api.github.com/search/users?q={clean_email}+in:email"
+                r_u = await client.get(user_url)
+                if r_u.status_code == 200 and r_u.json().get("total_count", 0) > 0:
+                    login = r_u.json()["items"][0].get("login", "")
+                    return {"registered": True, "details": f"GitHub profili: @{login}"}
+
+                return {"registered": False, "details": "Açık profil/commit yok"}
             except Exception:
                 return {"registered": False, "details": "Kontrol edilemedi"}
 
-        # 6. Archive.org
+        # 4. GitLab Avatar & Profile
+        async def _check_gitlab():
+            try:
+                url = f"https://gitlab.com/api/v4/avatar?email={clean_email}"
+                resp = await client.get(url)
+                if resp.status_code == 200 and resp.json().get("avatar_url"):
+                    return {"registered": True, "details": "GitLab avatar kaydı mevcut"}
+                return {"registered": False, "details": "GitLab kaydı yok"}
+            except Exception:
+                return {"registered": False, "details": "Kontrol edilemedi"}
+
+        # 5. Gravatar (WordPress)
+        async def _check_gravatar():
+            try:
+                md5_hash = hashlib.md5(clean_email.encode()).hexdigest()
+                url = f"https://gravatar.com/avatar/{md5_hash}?d=404"
+                resp = await client.get(url, follow_redirects=True)
+                has_avatar = resp.status_code == 200
+                return {
+                    "registered": has_avatar,
+                    "details": f"Avatar/Profil mevcut (MD5: {md5_hash[:8]}...)" if has_avatar else "Kayıt bulunamadı",
+                }
+            except Exception:
+                return {"registered": False, "details": "Kontrol edilemedi"}
+
+        # 6. Duolingo
+        async def _check_duolingo():
+            try:
+                url = f"https://www.duolingo.com/2017-06-30/users?email={clean_email}"
+                resp = await client.get(url)
+                if resp.status_code == 200:
+                    users = resp.json().get("users", [])
+                    if users:
+                        u = users[0]
+                        uname = u.get("username", "bilinmiyor")
+                        return {"registered": True, "details": f"Kullanıcı adı: @{uname}"}
+                return {"registered": False, "details": "Kayıt bulunamadı"}
+            except Exception:
+                return {"registered": False, "details": "Kontrol edilemedi"}
+
+        # 7. ProtonMail PGP Key Infrastructure
+        async def _check_proton():
+            try:
+                url = f"https://api.protonmail.ch/pks/lookup?op=get&search={clean_email}"
+                resp = await client.get(url)
+                if resp.status_code == 200 and "BEGIN PGP PUBLIC KEY" in resp.text:
+                    return {"registered": True, "details": "ProtonMail PGP Anahtarı aktif"}
+                return {"registered": False, "details": "Proton PGP kaydı yok"}
+            except Exception:
+                return {"registered": False, "details": "Kontrol edilemedi"}
+
+        # 8. Chess.com
+        async def _check_chess():
+            try:
+                url = f"https://api.chess.com/pub/player/{username}"
+                resp = await client.get(url)
+                if resp.status_code == 200:
+                    d = resp.json()
+                    p_name = d.get("username", username)
+                    return {"registered": True, "details": f"Oyuncu profili: @{p_name}"}
+                return {"registered": False, "details": "Kayıt bulunamadı"}
+            except Exception:
+                return {"registered": False, "details": "Kontrol edilemedi"}
+
+        # 9. Docker Hub
+        async def _check_docker():
+            try:
+                url = f"https://hub.docker.com/v2/users/{username}"
+                resp = await client.get(url)
+                if resp.status_code == 200:
+                    return {"registered": True, "details": f"Geliştirici profili: @{username}"}
+                return {"registered": False, "details": "Kayıt bulunamadı"}
+            except Exception:
+                return {"registered": False, "details": "Kontrol edilemedi"}
+
+        # 10. Archive.org (Wayback Uploads)
         async def _check_archive():
             try:
                 url = f"https://archive.org/advancedsearch.php?q=uploader%3A%22{clean_email}%22&output=json"
@@ -160,10 +214,14 @@ async def check_registered_services(email: str) -> dict[str, dict[str, Any]]:
 
         tasks = {
             "Spotify": _check_spotify(),
-            "Gravatar (WordPress)": _check_gravatar(),
-            "Duolingo": _check_duolingo(),
             "Microsoft / O365": _check_microsoft(),
             "GitHub": _check_github(),
+            "GitLab": _check_gitlab(),
+            "Gravatar (WordPress)": _check_gravatar(),
+            "Duolingo": _check_duolingo(),
+            "ProtonMail PGP": _check_proton(),
+            "Chess.com": _check_chess(),
+            "Docker Hub": _check_docker(),
             "Archive.org": _check_archive(),
         }
 
