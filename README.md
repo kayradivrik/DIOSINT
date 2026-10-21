@@ -12,7 +12,7 @@ Fast, asynchronous OSINT reconnaissance framework for passive information gather
 - **Subdomain Discovery:** Passive enumeration using Certificate Transparency (`crt.sh`) logs without sending traffic to the target domain.
 - **IP & Network Intel:** Geolocation, ASN, ISP, organization, PTR reverse DNS, and proxy/hosting detection.
 - **EXIF Forensics:** Extracts metadata, camera specs, software, and embedded GPS coordinates (with direct Google Maps links) from image files.
-- **Email OSINT:** RFC 5322 syntax validation, MX record verification, and breach detection via HaveIBeenPwned API.
+- **Email OSINT:** RFC 5322 syntax validation, MX verification, HaveIBeenPwned breach check, and account existence checks (Spotify, Microsoft/O365, Gravatar, Duolingo, GitHub, Archive.org).
 - **Web Recon:** Scrapes web technologies (CMS, libraries, frameworks), analyzes HTTP security headers (HSTS, CSP, X-Frame-Options), and maps links.
 - **Tor / Dark Web:** Queries Ahmia.fi index for `.onion` services.
 - **GEOINT:** Reverse geocodes coordinates to street addresses using OpenStreetMap Nominatim.
