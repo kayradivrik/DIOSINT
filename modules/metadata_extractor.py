@@ -148,6 +148,6 @@ def _display_metadata(data: dict[str, Any]):
             f"[bold cyan]Google Harita:[/] {gps['maps_url']}\n"
             f"[bold cyan]Google Earth:[/] {gps['earth_url']}"
         )
-        console.print(Panel(gps_text, title="🛰️ Tespit Edilen GPS Koordinatları", border_style="green"))
+        console.print(Panel(gps_text, title="[+] Tespit Edilen GPS Koordinatları", border_style="green"))
     else:
         console.print("[dim][i]Fotoğrafta gömülü GPS konum bilgisi yok.[/i][/dim]\n")

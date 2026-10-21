@@ -213,7 +213,7 @@ async def scrape_target(target_url: str, *args, depth: int = 1, **kwargs) -> dic
     parsed = urlparse(target_url)
     domain = parsed.netloc
 
-    console.print(f"\n[bold cyan]🌐 Derin Web Keşfi Başlatılıyor:[/] [yellow]{target_url}[/]")
+    console.print(f"\n[bold cyan][*] Derin Web Keşfi Başlatılıyor:[/] [yellow]{target_url}[/]")
     console.print("[dim]Teknolojiler, SSL/TLS, Güvenlik Başlıkları ve DNS analiz ediliyor...[/]\n")
 
     transport = proxy_manager.build_httpx_transport()
@@ -342,7 +342,7 @@ def _display_recon_results(data: dict[str, Any]):
         summary_table.add_row("E-posta Sunucuları (MX)", ", ".join(dns_sec["mx"]))
 
     ep = data.get("endpoints", {})
-    ep_str = f"robots.txt: {'✅' if ep.get('robots_txt') else '❌'} | sitemap.xml: {'✅' if ep.get('sitemap_xml') else '❌'} | security.txt: {'✅' if ep.get('security_txt') else '❌'}"
+    ep_str = f"robots.txt: {'[+] Var' if ep.get('robots_txt') else '[-] Yok'} | sitemap.xml: {'[+] Var' if ep.get('sitemap_xml') else '[-] Yok'} | security.txt: {'[+] Var' if ep.get('security_txt') else '[-] Yok'}"
     summary_table.add_row("Sistem Dosyaları", ep_str)
 
     console.print(summary_table)
@@ -350,7 +350,7 @@ def _display_recon_results(data: dict[str, Any]):
     # 2. Tespit Edilen Teknolojiler (Full-Stack)
     techs = data.get("technologies", {})
     if techs:
-        tech_table = Table(title="🛠️ Tespit Edilen Teknoloji Yığını (Tech Stack)", border_style="cyan")
+        tech_table = Table(title="Tespit Edilen Teknoloji Yığını (Tech Stack)", border_style="cyan")
         tech_table.add_column("Kategori", style="bold cyan", width=20)
         tech_table.add_column("Kullanılan Teknolojiler & Kütüphaneler", style="white")
 
@@ -367,7 +367,7 @@ def _display_recon_results(data: dict[str, Any]):
     socials = data.get("social_links", {})
 
     if emails or phones or socials:
-        contact_table = Table(title="📬 İletişim & Sosyal Ağ İzleri", border_style="green")
+        contact_table = Table(title="İletişim & Sosyal Ağ İzleri", border_style="green")
         contact_table.add_column("Tip", style="bold green", width=18)
         contact_table.add_column("Bulunan Veriler", style="white")
 
