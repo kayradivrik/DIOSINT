@@ -1,17 +1,8 @@
 # DIOSINT
 
-Fast, asynchronous OSINT reconnaissance framework for passive information gathering across usernames, IPs, domains, subdomains, emails, and media metadata.
+Fast, asynchronous OSINT reconnaissance framework for passive information gathering across usernames, IPs, domains, subdomains, emails, and media metadata. Built with Python, `httpx`, and `rich`.
 
-Built with Python, `httpx`, and `rich`. Includes an interactive cyberpunk terminal UI and a standalone CLI.
-
-```
- ██████╗ ██╗ ██████╗ ███████╗██╗███╗   ██╗████████╗
- ██╔══██╗██║██╔═══██╗██╔════╝██║████╗  ██║╚══██╔══╝
- ██║  ██║██║██║   ██║███████╗██║██╔██╗ ██║   ██║   
- ██║  ██║██║██║   ██║╚════██║██║██║╚██╗██║   ██║   
- ██████╔╝██║╚██████╔╝███████║██║██║ ╚████║   ██║   
- ╚═════╝ ╚═╝ ╚═════╝ ╚══════╝╚═╝╚═╝  ╚═══╝   ╚═╝   
-```
+![DIOSINT Terminal Interface](assets/terminal.png)
 
 ---
 
