@@ -1,14 +1,15 @@
 """
-scraper.py - Deep Web Technology & Reconnaissance Engine
-========================================================
+scraper.py - Deep Web Technology & Passive Security Audit Engine
+================================================================
 Performs full-stack technology fingerprinting (frontend, backend, CMS, CDN),
-SSL/TLS certificate inspection, DNS security posture (SPF/DMARC/MX),
-security header auditing, and contact intelligence gathering.
+passive vulnerability posture auditing (Cookies, CORS, Email Spoofing/DMARC,
+SSL/TLS protocol & expiration, exposed sensitive files), and OSINT contact discovery.
 """
 
 from __future__ import annotations
 
 import asyncio
+import datetime
 import re
 import socket
 import ssl
@@ -107,7 +108,6 @@ def detect_technologies(html: str, headers: httpx.Headers) -> dict[str, list[str
     combined_headers = " ".join(f"{k}: {v}" for k, v in headers.items()).lower()
     combined_target = (html + " " + combined_headers)
 
-    # Sunucu başlıkları
     server = headers.get("server")
     if server:
         categorized.setdefault("Web Server", []).append(server)
@@ -122,12 +122,147 @@ def detect_technologies(html: str, headers: httpx.Headers) -> dict[str, list[str
                 categorized.setdefault(cat, []).append(tech_name)
                 break
 
-    # Listeleri tekilleştir
     for cat in categorized:
         categorized[cat] = sorted(list(set(categorized[cat])))
 
     return categorized
 
+
+# ─── 5 TEMEL PASİF GÜVENLİK VE ZAFİYET DENETİMİ ─────────────────────────────
+
+def audit_cookies(headers: httpx.Headers) -> dict[str, Any]:
+    """1. Çerezlerin HttpOnly, Secure ve SameSite bayraklarını denetler."""
+    set_cookies = headers.get_list("set-cookie")
+    if not set_cookies:
+        return {"status": "info", "label": "[-] Bilgi", "details": "Sayfada çerez atanmadı"}
+
+    total = len(set_cookies)
+    missing_httponly = sum(1 for c in set_cookies if "httponly" not in c.lower())
+    missing_secure = sum(1 for c in set_cookies if "secure" not in c.lower())
+    missing_samesite = sum(1 for c in set_cookies if "samesite" not in c.lower())
+
+    issues = []
+    if missing_httponly:
+        issues.append(f"{missing_httponly}/{total} çerezde HttpOnly eksik (XSS riski)")
+    if missing_secure:
+        issues.append(f"{missing_secure}/{total} çerezde Secure eksik (Sniffing riski)")
+    if missing_samesite:
+        issues.append(f"{missing_samesite}/{total} çerezde SameSite eksik (CSRF riski)")
+
+    if issues:
+        return {"status": "warn", "label": "[!] Uyarı", "details": "; ".join(issues)}
+    return {"status": "safe", "label": "[+] Güvenli", "details": f"{total} çerez tam korumalı (HttpOnly, Secure, SameSite)"}
+
+
+async def audit_cors(target_url: str, client_kwargs: dict) -> dict[str, Any]:
+    """2. CORS başlıklarında Origin reflection veya yetkisiz erişim denetimi yapar."""
+    test_origin = "https://evil-osint-test.com"
+    headers = dict(DEFAULT_HEADERS)
+    headers["Origin"] = test_origin
+
+    try:
+        async with httpx.AsyncClient(**client_kwargs) as client:
+            resp = await client.get(target_url, headers=headers, timeout=5.0)
+            allow_origin = resp.headers.get("access-control-allow-origin")
+            allow_creds = resp.headers.get("access-control-allow-credentials", "").lower() == "true"
+
+            if allow_origin == test_origin:
+                if allow_creds:
+                    return {"status": "critical", "label": "[!] Kritik", "details": "Kritik Zafiyet: Yabancı Origin yansıtıldı ve Credentials açık"}
+                return {"status": "warn", "label": "[!] Uyarı", "details": "Dinamik Origin yansıtması tespit edildi"}
+            elif allow_origin == "*":
+                if allow_creds:
+                    return {"status": "critical", "label": "[!] Kritik", "details": "Hatalı CORS: Wildcard (*) ve Credentials aktif"}
+                return {"status": "info", "label": "[-] Bilgi", "details": "Wildcard (*) genel API erişimi açık"}
+            return {"status": "safe", "label": "[+] Güvenli", "details": "Yabancı Origin reddedildi"}
+    except Exception:
+        return {"status": "info", "label": "[-] Bilgi", "details": "CORS yanıtı alınamadı"}
+
+
+def audit_email_spoofing(dns_intel: dict[str, Any]) -> dict[str, Any]:
+    """3. SPF ve DMARC kayıtlarına göre e-posta sahteciliği (Spoofing) zafiyetini denetler."""
+    dmarc = dns_intel.get("dmarc", "Yok")
+
+    if dmarc == "Yok":
+        return {
+            "status": "critical",
+            "label": "[!] Kritik",
+            "details": "DMARC kaydı yok! Alan adı adına sahte e-posta gönderilebilir (Spoofable)",
+        }
+    elif "p=none" in dmarc:
+        return {
+            "status": "warn",
+            "label": "[!] Uyarı",
+            "details": "DMARC yalnızca izleme modunda (p=none), sahte mailler engellenmiyor",
+        }
+    elif "p=reject" in dmarc or "p=quarantine" in dmarc:
+        return {
+            "status": "safe",
+            "label": "[+] Güvenli",
+            "details": "DMARC politikası aktif (p=quarantine/reject), sahte mailler engelleniyor",
+        }
+    return {"status": "info", "label": "[-] Bilgi", "details": "DMARC analizi yapılamadı"}
+
+
+def audit_ssl_security(ssl_info: dict[str, Any]) -> dict[str, Any]:
+    """4. SSL/TLS protokol sürümü ve sertifika kalan gün sayısını denetler."""
+    if not ssl_info.get("valid"):
+        return {"status": "critical", "label": "[!] Kritik", "details": "SSL/TLS sertifikası geçersiz veya yok"}
+
+    tls_ver = ssl_info.get("tls_version", "")
+    expires_str = ssl_info.get("expires", "")
+    issues = []
+
+    if tls_ver in ("TLSv1", "TLSv1.1", "SSLv3"):
+        issues.append(f"Eski ve güvensiz protokol ({tls_ver})")
+
+    days_left = None
+    if expires_str and expires_str != "-":
+        try:
+            exp_date = datetime.datetime.strptime(expires_str, "%b %d %H:%M:%S %Y %Z")
+            exp_date = exp_date.replace(tzinfo=datetime.timezone.utc)
+            now = datetime.datetime.now(datetime.timezone.utc)
+            days_left = (exp_date - now).days
+            if days_left < 0:
+                issues.append("Sertifika süresi dolmuş!")
+            elif days_left < 15:
+                issues.append(f"Acil: Sertifika bitimine {days_left} gün kaldı")
+            elif days_left < 30:
+                issues.append(f"Uyarı: Sertifika bitimine {days_left} gün kaldı")
+        except Exception:
+            pass
+
+    if issues:
+        return {"status": "warn", "label": "[!] Uyarı", "details": "; ".join(issues)}
+    days_str = f"({days_left} gün geçerli)" if days_left is not None else ""
+    return {"status": "safe", "label": "[+] Güvenli", "details": f"{tls_ver} aktif {days_str}".strip()}
+
+
+async def audit_sensitive_files(target_url: str, client_kwargs: dict) -> dict[str, Any]:
+    """5. Kazara açık bırakılmış standart sistem ve yedek dosyalarını denetler."""
+    checks = [
+        ("/.git/HEAD", "ref:", "Kritik: .git deposu açıkta"),
+        ("/.env", "=", "Kritik: .env konfigürasyon dosyası açıkta"),
+        ("/phpinfo.php", "phpinfo", "Uyarı: phpinfo sayfası erişilebilir"),
+    ]
+
+    found = []
+    async with httpx.AsyncClient(**client_kwargs) as client:
+        for path, keyword, label in checks:
+            try:
+                full_url = urljoin(target_url, path)
+                resp = await client.get(full_url, timeout=4.0, follow_redirects=False)
+                if resp.status_code == 200 and keyword in resp.text:
+                    found.append(f"{label} ({path})")
+            except Exception:
+                pass
+
+    if found:
+        return {"status": "critical", "label": "[!] Kritik", "details": "; ".join(found)}
+    return {"status": "safe", "label": "[+] Güvenli", "details": "Açıkta kritik sistem/git dosyası bulunamadı"}
+
+
+# ─── SSL VE DNS ANALİZİ ──────────────────────────────────────────────────────
 
 def inspect_ssl_certificate(domain: str) -> dict[str, Any]:
     """Hedef sunucunun SSL/TLS sertifikasını ve protokol sürümünü inceler."""
@@ -161,7 +296,6 @@ async def inspect_dns_security(domain: str) -> dict[str, Any]:
     dns_intel = {"spf": "Yok", "dmarc": "Yok", "mx": []}
     async with httpx.AsyncClient(headers=DEFAULT_HEADERS, timeout=6.0) as client:
         try:
-            # 1. TXT / SPF
             r_txt = await client.get(f"https://dns.google/resolve?name={domain}&type=TXT")
             if r_txt.status_code == 200:
                 answers = r_txt.json().get("Answer", [])
@@ -170,7 +304,6 @@ async def inspect_dns_security(domain: str) -> dict[str, Any]:
                     if "v=spf1" in data:
                         dns_intel["spf"] = data.strip('"')
 
-            # 2. DMARC
             r_dmarc = await client.get(f"https://dns.google/resolve?name=_dmarc.{domain}&type=TXT")
             if r_dmarc.status_code == 200:
                 answers = r_dmarc.json().get("Answer", [])
@@ -179,7 +312,6 @@ async def inspect_dns_security(domain: str) -> dict[str, Any]:
                     if "v=DMARC1" in data:
                         dns_intel["dmarc"] = data.strip('"')
 
-            # 3. MX Records
             r_mx = await client.get(f"https://dns.google/resolve?name={domain}&type=MX")
             if r_mx.status_code == 200:
                 answers = r_mx.json().get("Answer", [])
@@ -205,16 +337,18 @@ def analyze_security_headers(headers: httpx.Headers) -> dict[str, Any]:
     return {"score": score, "grade": grade, "details": sec_headers}
 
 
+# ─── ANA TARAMA FONKSİYONU ───────────────────────────────────────────────────
+
 async def scrape_target(target_url: str, *args, depth: int = 1, **kwargs) -> dict[str, Any]:
-    """Hedef web sitesinde derinlemesine teknoloji, altyapı ve güvenlik taraması yapar."""
+    """Hedef web sitesinde derinlemesine teknoloji, altyapı ve pasif güvenlik denetimi yapar."""
     if not target_url.startswith(("http://", "https://")):
         target_url = "https://" + target_url
 
     parsed = urlparse(target_url)
     domain = parsed.netloc
 
-    console.print(f"\n[bold cyan][*] Derin Web Keşfi Başlatılıyor:[/] [yellow]{target_url}[/]")
-    console.print("[dim]Teknolojiler, SSL/TLS, Güvenlik Başlıkları ve DNS analiz ediliyor...[/]\n")
+    console.print(f"\n[bold cyan][*] Derin Web ve Guvenlik Kesfi Baslatiliyor:[/] [yellow]{target_url}[/]")
+    console.print("[dim]Teknolojiler, SSL/TLS, Cerezler, CORS, DMARC ve sistem dosyalari analiz ediliyor...[/]\n")
 
     transport = proxy_manager.build_httpx_transport()
     client_kwargs = dict(headers=DEFAULT_HEADERS, follow_redirects=True)
@@ -230,6 +364,7 @@ async def scrape_target(target_url: str, *args, depth: int = 1, **kwargs) -> dic
         "ssl_cert": {},
         "dns_security": {},
         "security_headers": {},
+        "security_audits": {},
         "meta": {},
         "emails": [],
         "phones": [],
@@ -238,9 +373,10 @@ async def scrape_target(target_url: str, *args, depth: int = 1, **kwargs) -> dic
         "links": {"internal_count": 0, "external_count": 0},
     }
 
-    # Asenkron görevler: HTTP isteği, SSL denetimi, DNS güvenliği
     ssl_task = asyncio.to_thread(inspect_ssl_certificate, domain)
     dns_task = inspect_dns_security(domain)
+    cors_task = audit_cors(target_url, client_kwargs)
+    files_task = audit_sensitive_files(target_url, client_kwargs)
 
     async with httpx.AsyncClient(**client_kwargs) as client:
         await global_limiter.acquire()
@@ -251,17 +387,18 @@ async def scrape_target(target_url: str, *args, depth: int = 1, **kwargs) -> dic
             html = resp.text
             soup = BeautifulSoup(html, "lxml")
 
-            # 1. Başlık & Meta
             title_tag = soup.find("title")
             result["title"] = title_tag.get_text(strip=True) if title_tag else ""
             desc = soup.find("meta", attrs={"name": "description"}) or soup.find("meta", attrs={"property": "og:description"})
             result["meta"]["description"] = desc.get("content", "").strip() if desc else ""
 
-            # 2. Teknolojiler & Güvenlik Başlıkları
             result["technologies"] = detect_technologies(html, resp.headers)
             result["security_headers"] = analyze_security_headers(resp.headers)
 
-            # 3. İletişim & Sosyal Medya
+            # Çerez denetimi
+            cookie_audit = audit_cookies(resp.headers)
+
+            # İletişim & Sosyal Medya
             result["emails"] = sorted(list(set(EMAIL_PATTERN.findall(html))))[:15]
             raw_phones = PHONE_PATTERN.findall(html)
             result["phones"] = sorted(list(set(p.strip() for p in raw_phones if 7 <= len(p.strip()) <= 18)))[:10]
@@ -273,7 +410,7 @@ async def scrape_target(target_url: str, *args, depth: int = 1, **kwargs) -> dic
                     socials[platform] = matches[:3]
             result["social_links"] = socials
 
-            # 4. Link İstatistikleri
+            # Link İstatistikleri
             internal, external = set(), set()
             for a in soup.find_all("a", href=True):
                 href = urljoin(target_url, a["href"])
@@ -285,7 +422,6 @@ async def scrape_target(target_url: str, *args, depth: int = 1, **kwargs) -> dic
             result["links"]["internal_count"] = len(internal)
             result["links"]["external_count"] = len(external)
 
-            # 5. Kritik Sistem Yolları Kontrolü (robots.txt vb.)
             async def _check_path(path_suffix: str) -> bool:
                 try:
                     r = await client.get(urljoin(target_url, path_suffix), timeout=5.0)
@@ -304,16 +440,33 @@ async def scrape_target(target_url: str, *args, depth: int = 1, **kwargs) -> dic
 
         except Exception as e:
             result["error"] = str(e)
+            cookie_audit = {"status": "info", "label": "[-] Bilgi", "details": "Sayfa acilamadi"}
 
-    # Paralel tamamlanan SSL ve DNS verilerini ekle
-    result["ssl_cert"], result["dns_security"] = await asyncio.gather(ssl_task, dns_task)
+    # Paralel tamamlanan SSL, DNS, CORS ve Açık Dosya analizlerini topla
+    ssl_res, dns_res, cors_res, files_res = await asyncio.gather(
+        ssl_task, dns_task, cors_task, files_task
+    )
+    result["ssl_cert"] = ssl_res
+    result["dns_security"] = dns_res
+
+    # 5 Temel Pasif Güvenlik Denetimi Sonuçları
+    spoofing_audit = audit_email_spoofing(dns_res)
+    ssl_audit = audit_ssl_security(ssl_res)
+
+    result["security_audits"] = {
+        "Cerez Guvenlik Bayraklari": cookie_audit,
+        "CORS Yapilandirmasi": cors_res,
+        "E-Posta Sahteciligi (DMARC/SPF)": spoofing_audit,
+        "SSL/TLS Protokol & Sure": ssl_audit,
+        "Kritik Dosya Ifsasi": files_res,
+    }
 
     _display_recon_results(result)
     return result
 
 
 def _display_recon_results(data: dict[str, Any]):
-    """Sonuçları Rich tablolarıyla profesyonelce sunar."""
+    """Sonuçları temiz CLI tablolarıyla sunar."""
     # 1. Genel Özet Tablosu
     summary_table = Table(title=f"Web İstihbaratı: {data.get('domain')}", border_style="#d946ef")
     summary_table.add_column("Parametre", style="bold #ec4899", width=22)
@@ -347,7 +500,30 @@ def _display_recon_results(data: dict[str, Any]):
 
     console.print(summary_table)
 
-    # 2. Tespit Edilen Teknolojiler (Full-Stack)
+    # 2. 5 Temel Pasif Güvenlik Denetimi Tablosu
+    audits = data.get("security_audits", {})
+    if audits:
+        audit_table = Table(title="Güvenlik & Yapılandırma Denetimi (Vulnerability & Misconfiguration Audit)", border_style="red")
+        audit_table.add_column("Denetim Başlığı", style="bold yellow", width=30)
+        audit_table.add_column("Durum", width=14)
+        audit_table.add_column("Detay & Risk Değerlendirmesi", style="white")
+
+        for audit_name, audit_data in audits.items():
+            status = audit_data.get("status", "info")
+            if status == "critical":
+                st_str = "[bold red][!] KRITIK[/bold red]"
+            elif status == "warn":
+                st_str = "[bold yellow][!] UYARI[/bold yellow]"
+            elif status == "safe":
+                st_str = "[bold green][+] GUVENLI[/bold green]"
+            else:
+                st_str = "[dim][-] BILGI[/dim]"
+
+            audit_table.add_row(audit_name, st_str, audit_data.get("details", ""))
+
+        console.print(audit_table)
+
+    # 3. Tespit Edilen Teknolojiler (Full-Stack)
     techs = data.get("technologies", {})
     if techs:
         tech_table = Table(title="Tespit Edilen Teknoloji Yığını (Tech Stack)", border_style="cyan")
@@ -361,7 +537,7 @@ def _display_recon_results(data: dict[str, Any]):
     else:
         console.print("[yellow][-] Belirgin teknoloji imzası tespit edilemedi.[/yellow]")
 
-    # 3. İletişim & Sosyal Medya
+    # 4. İletişim & Sosyal Medya
     emails = data.get("emails", [])
     phones = data.get("phones", [])
     socials = data.get("social_links", {})
