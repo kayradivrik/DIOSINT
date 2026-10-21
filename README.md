@@ -13,7 +13,7 @@ Fast, asynchronous OSINT reconnaissance framework for passive information gather
 - **IP & Network Intel:** Geolocation, ASN, ISP, organization, PTR reverse DNS, and proxy/hosting detection.
 - **EXIF Forensics:** Extracts metadata, camera specs, software, and embedded GPS coordinates (with direct Google Maps links) from image files.
 - **Email OSINT:** RFC 5322 syntax validation, MX verification, HaveIBeenPwned breach check, and account existence checks (Spotify, Microsoft/O365, Gravatar, Duolingo, GitHub, Archive.org).
-- **Web Recon:** Scrapes web technologies (CMS, libraries, frameworks), analyzes HTTP security headers (HSTS, CSP, X-Frame-Options), and maps links.
+- **Web Recon & Framework Profiling:** Deep technology fingerprinting across 50+ signatures (React, Next.js, Vue, Nuxt, Angular, Django, Laravel, Rails, WordPress, Shopify), SSL/TLS certificate inspection, DNS security posture (SPF/DMARC/MX), and HTTP header audit.
 - **Tor / Dark Web:** Queries Ahmia.fi index for `.onion` services.
 - **GEOINT:** Reverse geocodes coordinates to street addresses using OpenStreetMap Nominatim.
 - **Relation Mapping:** Builds node-edge entity graphs using NetworkX and exports interactive HTML charts (pyvis).

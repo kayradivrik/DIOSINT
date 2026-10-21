@@ -144,24 +144,18 @@ def cmd_phone(
         _save_and_notify(result, "phone", target, output)
 
 
-@app.command(name="scrape", help="Web sitesinden email/telefon/sosyal link cek")
+@app.command(name="scrape", help="Web sitesinin framework, teknoloji, SSL ve iletisim izlerini analiz et")
 def cmd_scrape(
-    target: str = typer.Option(..., "--target", "-t", help="Hedef URL"),
-    data: str = typer.Option("all", "--data", "-d", help="emails | phones | social | meta | all"),
-    depth: int = typer.Option(1, "--depth", help="Tarama derinligi (1 veya 2)"),
+    target: str = typer.Option(..., "--target", "-t", help="Hedef URL veya Domain"),
     output: str = typer.Option("json", "--output", "-o", help="Cikti formati"),
 ):
     print_banner()
     if not target.startswith(("http://", "https://")):
         target = "https://" + target
-    data_types = (
-        ["emails", "phones", "social", "meta"] if data == "all"
-        else data.split(",")
-    )
     from modules.scraper import scrape_target
-    result = asyncio.run(scrape_target(target, data_types, depth))
+    result = asyncio.run(scrape_target(target))
     if output != "none":
-        _save_and_notify(result, "scrape", target, output)
+        _save_and_notify(result, "web_recon", target, output)
 
 
 @app.command(name="shodan", help="Shodan'da cihaz/servis ara")

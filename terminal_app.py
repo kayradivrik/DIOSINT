@@ -232,32 +232,20 @@ def run_phone():
 
 
 def run_domain():
-    """[6] Web sitesini kazır, CMS, kütüphaneler ve güvenlik başlıklarını puanlar."""
-    console.print("\n[bold #d946ef]=== [6] DOMAIN & WEB TECH SCRAPER ===[/bold #d946ef]\n")
+    """[6] Web sitesinin CMS, framework, SSL, DNS ve guvenlik basliklarini analiz eder."""
+    console.print("\n[bold #d946ef]=== [6] FULL-STACK WEB TECH & RECON ENGINE ===[/bold #d946ef]\n")
     url = Prompt.ask("[bold white]Hedef URL (Örn: https://example.com)[/bold white]")
     if not url:
         return
     
-    with console.status("[bold #d946ef]Web sitesi taranıyor ve analiz ediliyor...[/bold #d946ef]", spinner="dots"):
+    with console.status("[bold #d946ef]Web sitesi, SSL, DNS ve teknolojiler derinlemesine taranıyor...[/bold #d946ef]", spinner="dots"):
         data = asyncio.run(scrape_target(url))
     
     if "error" in data and not data.get("title"):
         console.print(f"[red]Hata: {data['error']}[/red]")
         return
     
-    console.print(f"\n[bold white]Başlık:[/] [cyan]{data.get('title')}[/cyan]")
-    console.print(f"[bold white]Sunucu:[/] {data.get('server') or 'Bilinmiyor'}")
-    
-    sec = data.get("security", {})
-    grade = sec.get("grade", "F")
-    score = sec.get("score", 0)
-    console.print(f"[bold white]Güvenlik Karne Notu:[/] [bold magenta]{grade} ({score}/100)[/bold magenta]")
-    
-    console.print(f"[bold #ec4899]Tespit Edilen Teknolojiler:[/] {', '.join(data.get('technologies', [])) or 'Yok'}")
-    console.print(f"[bold #ec4899]E-postalar:[/] {data.get('emails', []) or 'Yok'}")
-    console.print(f"[bold #ec4899]Sosyal Linkler:[/] {list(data.get('social_links', {}).keys()) or 'Yok'}")
-    
-    save_report(data, "web_scraper", data.get("domain", "site"))
+    save_report(data, "web_recon", data.get("domain", "site"))
 
 
 def run_ip():
