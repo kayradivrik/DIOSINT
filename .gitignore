@@ -1,0 +1,43 @@
+# ==============================================================================
+# DIOSINT - Git Ignore Configuration
+# ==============================================================================
+
+# Virtual Environment
+venv/
+env/
+.venv/
+ENV/
+
+# Python Cache & Bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyc
+
+# Environment & Sensitive Files
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+*.cert
+proxies.txt
+
+# Generated Reports & Output Data (Personal / Target info)
+reports/*
+!reports/.gitkeep
+
+# Operating System & IDE Artifacts
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Logs & Temporary Files
+*.log
+scratch/
+tmp/

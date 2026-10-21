@@ -1,0 +1,36 @@
+# Core HTTP & Async
+httpx[asyncio]>=0.27.0
+aiohttp>=3.9.0
+
+# HTML Parsing
+beautifulsoup4>=4.12.0
+lxml>=5.0.0
+
+# CLI Framework
+typer[all]>=0.12.0
+rich>=13.7.0
+
+# Data Processing
+pandas>=2.2.0
+networkx>=3.3
+
+# Browser Automation (opsiyonel, selenium tabanlı)
+selenium>=4.21.0
+webdriver-manager>=4.0.1
+
+# Proxy & Networking
+requests[socks]>=2.31.0
+PySocks>=1.7.1
+
+# Utilities
+python-dotenv>=1.0.0
+pydantic>=2.7.0
+tenacity>=8.3.0        # Retry logic
+fake-useragent>=1.5.1  # Rastgele User-Agent
+
+# Visualization
+matplotlib>=3.8.0
+pyvis>=0.3.2           # İnteraktif ağ grafiği
+
+# Reporting
+jinja2>=3.1.0
