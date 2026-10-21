@@ -139,7 +139,15 @@ python main.py geoint --lat 41.0082 --lon 28.9784
 
 ---
 
+## 👨‍💻 Geliştirici & Yazar (Author)
+
+**Kayra Divrik**  
+- GitHub: [@kayradivrik](https://github.com/kayradivrik) *(veya profil linkiniz)*  
+- Proje: **Diosint OSINT & Cyber Reconnaissance Framework**
+
+---
+
 ## 📜 Lisans & Yasal Sorumluluk
 
-Bu proje [MIT Lisansı](LICENSE) kapsamında açık kaynak olarak sunulmuştur.  
+Bu proje **Kayra Divrik** telif hakkı altında [MIT Lisansı](LICENSE) kapsamında açık kaynak olarak sunulmuştur.  
 Kullanıcılar, yazılımı kullanırken yürürlükteki tüm yasalara (TCK Madde 243-244, KVKK, GDPR) uymakla yükümlüdür. Ayrıntılar için [DISCLAIMER.md](DISCLAIMER.md) belgesini okuyunuz.
