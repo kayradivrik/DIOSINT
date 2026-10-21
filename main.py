@@ -23,10 +23,13 @@ import asyncio
 from pathlib import Path
 from typing import Optional
 
-# Force UTF-8 on Windows terminals (must come after __future__ import)
+# Force UTF-8 on Windows terminals
 if sys.platform == "win32":
-    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
-    sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding="utf-8", errors="replace")
+    try:
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+        sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+    except Exception:
+        pass
 
 import typer
 from rich.console import Console
