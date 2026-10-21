@@ -55,8 +55,9 @@ BANNER = r"""
 | |_| | | (_) \__ \ | | | | |_ 
 |____/|_|\___/|___/_|_| |_|\__|
 [/bold cyan]
-[dim]  Diosint Intelligence Engine v2.0  |  Enterprise OSINT[/dim]
-[bold red]!! YALNIZCA EGITIM & ETIK GUVENLIK ARASTIRMASI ICINDIR !![/bold red]
+[dim]  Diosint Intelligence Engine v2.0  |  github.com/kayradivrik/DIOSINT[/dim]
+[dim red]Bu araç yalnızca yasal güvenlik testleri, sızma testi izin belgeli sistemler ve eğitim amaçlı geliştirilmiştir.[/dim red]
+[dim red]İzinsiz hedeflere karşı kullanımında tüm yasal sorumluluk kullanıcıya aittir.[/dim red]
 """
 
 

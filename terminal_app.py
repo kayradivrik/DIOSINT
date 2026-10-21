@@ -62,13 +62,17 @@ def render_banner():
  [bold #a855f7]██║  ██║██║██║   ██║███████╗██║██╔██╗ ██║   ██║   [/]
  [bold #9333ea]██║  ██║██║██║   ██║╚════██║██║██║╚██╗██║   ██║   [/]
  [bold #7e22ce]██████╔╝██║╚██████╔╝███████║██║██║ ╚████║   ██║   [/]
- [bold #6b21a8]╚═════╝ ╚═╝ ╚═════╝ ╚══════╝╚═╝╚═╝  ╚═══╝   ╚═╝   [/]
-    """
+ [bold #6b21a8]╚═════╝ ╚═╝ ╚═════╝ ╚══════╝╚═╝╚═╝  ╚═══╝   ╚═╝   [/]"""
     console.print(banner_text)
     console.print(
-        Align.center("[bold #ec4899]github.com/diosint  |  v2.0 Cyber Intelligence Edition[/bold #ec4899]")
+        Align.center("[bold #ec4899]github.com/kayradivrik/DIOSINT  |  v2.0 Cyber Intelligence Edition[/bold #ec4899]")
     )
-    console.print()
+    console.print(
+        Align.center("[dim red]Bu araç yalnızca yasal güvenlik testleri, sızma testi izin belgeli sistemler ve eğitim amaçlı geliştirilmiştir.[/dim red]")
+    )
+    console.print(
+        Align.center("[dim red]İzinsiz hedeflere karşı kullanımında tüm yasal sorumluluk kullanıcıya aittir.[/dim red]\n")
+    )
 
 
 def render_menu():

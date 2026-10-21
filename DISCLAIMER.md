@@ -1,25 +1,29 @@
-# ⚖️ Legal Disclaimer / Yasal Sorumluluk Reddi
+# Legal Disclaimer / Kullanim Sozlesmesi
 
 ---
 
-## 🇹🇷 Türkçe
+## [TR] Yasal Uyari ve Kullanim Sozlesmesi
 
-Bu yazılım (**Diosint**), siber güvenlik araştırmacıları, adli bilişim uzmanları ve etik güvenlik uzmanları için **açık kaynak istihbaratı (OSINT)** toplama ve eğitim amacıyla geliştirilmiştir.
+> **"Bu araç yalnızca yasal güvenlik testleri, sızma testi izin belgeli sistemler ve eğitim amaçlı geliştirilmiştir. İzinsiz hedeflere karşı kullanımında tüm yasal sorumluluk kullanıcıya aittir."**
 
-### Önemli Hükümler:
-1. **Yalnızca Yetkili ve Etik Kullanım:** Bu araç yalnızca mülkiyeti size ait olan sistemler, yazılı izin aldığınız hedefler veya kamuya açık (publicly accessible) kaynaklar üzerinde kullanılmalıdır.
-2. **Yasal Sorumluluk:** Bu yazılımın yetkisiz veya yasa dışı faaliyetlerde (örneğin TCK Madde 243-244 uyarınca Bilişim Sistemlerine İzinsiz Girme ve Engelleme, KVKK / GDPR ihlalleri vb.) kullanılmasından doğabilecek tüm hukuki ve cezai sorumluluk **tamamen son kullanıcıya aittir**.
-3. **Geliştirici Sorumluluğu:** Proje geliştiricileri, yazılımın kötüye kullanımından, veri kayıplarından veya sebep olabileceği herhangi bir zarardan ötürü sorumlu tutulamaz.
-4. **Pasif İstihbarat:** Araç, kamuya açık arama motorları, genel API servisleri ve açık kayıtlar üzerinden sorgulama yapar. Zararlı yazılım, istismar (exploit) veya yetkisiz erişim araçları içermez.
+Bu yazilim (**DIOSINT**), siber guvenlik arastirmacilari, adli bilisim uzmanlari ve yetkili sizma testi ekipleri icin acik kaynak istihbarati (OSINT) toplama ve guvenlik denetimi amaciyla gelistirilmistir.
+
+### Hukuki Sartlar ve Kosullar:
+1. **Yetkili ve Yasal Kullanim:** Bu arac yalnizca mulkiyeti size ait olan sistemlerde veya yazili/resmi sizma testi izin belgesi bulunan hedeflerde kullanilabilir.
+2. **Yasal Sorumluluk:** Bu yazilimin yetkisiz, izinsiz veya yasa disi faaliyetlerde (Turk Ceza Kanunu Madde 243-244 Bililisim Sistemlerine Girme/Engelleme, KVKK ve GDPR ihlalleri dahil) kullanilmasindan dogacak her turlu cezai, idari ve hukuki sorumluluk tamamen kullaniciya aittir.
+3. **Gelistirici Sorumluluk Reddi:** Proje gelistiricisi (Kayra Divrik), yazilimin ucuncu kisiler tarafindan hatali veya kotuye kullanimindan, veri kayiplarindan veya hedef sistemlerde olusabilecek dogrudan/dolayli zararlardan sorumlu tutulamaz.
+4. **Pasif Guvenlik Arastirmasi:** Bu yazilim exploit, yetkisiz sizma, brute-force veya servis disi birakma (DoS) saldirisi gerceklestirmez; kamuya acik kaynaklardan pasif istihbarat ve header/konfigurasyon analizi yapar.
 
 ---
 
-## 🇬🇧 English
+## [EN] Legal Disclaimer
 
-This software (**Diosint**) is intended solely for educational purposes, security research, digital forensics, and ethical Open Source Intelligence (OSINT) gathering.
+> **"This tool has been developed solely for legal security testing, authorized penetration testing with signed permission, and educational purposes. The user bears full legal responsibility for any usage against unauthorized targets."**
 
-### Terms of Use:
-1. **Authorized Use Only:** Users must ensure they have proper authorization prior to assessing any target. This tool must only be used on targets you own, have explicit written permission to assess, or for indexing publicly available information.
-2. **Compliance with Laws:** Users are strictly responsible for complying with all applicable local, state, national, and international laws, regulations, and privacy standards (e.g., Computer Fraud and Abuse Act - CFAA, GDPR, CCPA).
-3. **Limitation of Liability:** The developers and contributors assume no liability and are not responsible for any misuse, damage, or legal consequences caused by this program.
-4. **No Malicious Intent:** This tool relies on public OSINT endpoints and APIs. It does not contain any malware, automated exploitation, or unauthorized intrusion mechanisms.
+This software (**DIOSINT**) is designed for open-source intelligence gathering and passive security auditing by authorized professionals and security researchers.
+
+### Terms of Engagement:
+1. **Authorized Auditing Only:** Users must possess verified, documented permission before scanning or evaluating any infrastructure they do not own.
+2. **Compliance with Local and International Laws:** Users are strictly responsible for complying with all applicable computer crime and data privacy regulations (e.g., CFAA, GDPR, CCPA).
+3. **Limitation of Liability:** The author (Kayra Divrik) accepts no liability and cannot be held accountable for damages, data breaches, or legal actions resulting from the execution of this software.
+4. **Passive Methodology:** The framework uses passive OSINT querying and non-intrusive metadata analysis. It contains no active exploits or payload delivery mechanisms.
