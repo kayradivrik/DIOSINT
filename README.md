@@ -12,7 +12,7 @@ Fast, asynchronous OSINT reconnaissance framework for passive information gather
 - **Subdomain Discovery:** Passive enumeration using Certificate Transparency (`crt.sh`) logs without sending traffic to the target domain.
 - **IP & Network Intel:** Geolocation, ASN, ISP, organization, PTR reverse DNS, and proxy/hosting detection.
 - **EXIF Forensics:** Extracts metadata, camera specs, software, and embedded GPS coordinates (with direct Google Maps links) from image files.
-- **Email OSINT:** RFC 5322 syntax validation, MX verification, HaveIBeenPwned breach check, and Holehe-style account existence checks (Spotify, Microsoft/O365, GitHub, GitLab, Gravatar, Duolingo, ProtonMail, Chess.com, Docker Hub, Archive.org).
+- **Email OSINT:** RFC 5322 syntax validation, MX verification, HaveIBeenPwned breach check, and Holehe-style account existence checks (Spotify, Microsoft/O365, GitHub, GitLab, Gravatar, Duolingo, ProtonMail, Steam Community, Telegram, Chess.com, Docker Hub, Archive.org).
 - **Web Recon & Framework Profiling:** Deep technology fingerprinting across 50+ signatures (React, Next.js, Vue, Nuxt, Angular, Django, Laravel, Rails, WordPress, Shopify), SSL/TLS certificate inspection, DNS security posture (SPF/DMARC/MX), and HTTP header audit.
 - **Tor / Dark Web:** Queries Ahmia.fi index for `.onion` services.
 - **GEOINT:** Reverse geocodes coordinates to street addresses using OpenStreetMap Nominatim.

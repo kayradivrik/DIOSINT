@@ -212,6 +212,34 @@ async def check_registered_services(email: str) -> dict[str, dict[str, Any]]:
             except Exception:
                 return {"registered": False, "details": "Kontrol edilemedi"}
 
+        # 11. Steam Community
+        async def _check_steam():
+            try:
+                url = f"https://steamcommunity.com/id/{username}"
+                resp = await client.get(url, follow_redirects=True)
+                if resp.status_code == 200 and "actual_persona_name" in resp.text:
+                    m = re.search(r'actual_persona_name">([^<]+)<', resp.text)
+                    persona = m.group(1).strip() if m else username
+                    return {"registered": True, "details": f"Oyuncu profili: {persona}"}
+                return {"registered": False, "details": "Kayıt bulunamadı"}
+            except Exception:
+                return {"registered": False, "details": "Kontrol edilemedi"}
+
+        # 12. Telegram Web
+        async def _check_telegram():
+            try:
+                url = f"https://t.me/{username}"
+                resp = await client.get(url)
+                if resp.status_code == 200 and "tgme_page_extra" in resp.text:
+                    m_title = re.search(r'<div class="tgme_page_title"[^>]*>\s*(?:<span[^>]*>)?([^<]+)', resp.text)
+                    m_extra = re.search(r'<div class="tgme_page_extra">([^<]+)</div>', resp.text)
+                    title = m_title.group(1).strip() if m_title else username
+                    extra = f" ({m_extra.group(1).strip()})" if m_extra else ""
+                    return {"registered": True, "details": f"Profil: {title}{extra}"}
+                return {"registered": False, "details": "Kayıt bulunamadı"}
+            except Exception:
+                return {"registered": False, "details": "Kontrol edilemedi"}
+
         tasks = {
             "Spotify": _check_spotify(),
             "Microsoft / O365": _check_microsoft(),
@@ -220,6 +248,8 @@ async def check_registered_services(email: str) -> dict[str, dict[str, Any]]:
             "Gravatar (WordPress)": _check_gravatar(),
             "Duolingo": _check_duolingo(),
             "ProtonMail PGP": _check_proton(),
+            "Steam Community": _check_steam(),
+            "Telegram": _check_telegram(),
             "Chess.com": _check_chess(),
             "Docker Hub": _check_docker(),
             "Archive.org": _check_archive(),
