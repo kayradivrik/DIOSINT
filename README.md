@@ -24,6 +24,8 @@
 
 - 🔍 **Username Reconnaissance:** 40'tan fazla popüler platformda eş zamanlı (asenkron `httpx`) profil varlığı tespiti ve GitHub API derin profillemesi.
 - 🌐 **IP & Network Intelligence:** IP geolocation, Autonomous System (ASN), ISP, PTR ters DNS ve proxy/barındırma tespiti.
+- 🔐 **Passive Subdomain Discovery:** `crt.sh` (Certificate Transparency) ve DNS loglarından hedef sunucuya dokunmadan pasif alt alan adı tespiti.
+- 🖼️ **Image & EXIF Forensic:** Fotoğraflardan cihaz bilgisi, lens parametreleri, yazılım ve gömülü GPS koordinatlarını çözümleme.
 - 📧 **Email & Breach Intelligence:** RFC 5322 e-posta doğrulaması, MX kayıt denetimi ve HaveIBeenPwned API sızıntı sorgulaması.
 - 🕷️ **Asynchronous Web Scraper:** CMS, sunucu, kütüphaneler, OpenGraph metadataları, güvenlik başlıkları analizi (HSTS, CSP, X-Frame-Options) ve link haritalama.
 - 🧅 **Tor & Dark Web Intelligence:** Ahmia motoru üzerinden kamuya açık `.onion` arama ve indeksleme.
@@ -45,6 +47,7 @@ Diosint/
 ├── diosint.bat           # Windows kullanıcıları için çift tıkla-çalıştır başlatıcısı
 ├── config.py             # Merkezi konfigürasyon ve platform tanımları
 ├── requirements.txt      # Gerekli bağımlılıklar
+├── Dockerfile            # Containerize çalıştırma desteği
 ├── .env.example          # Örnek API anahtar şablonu
 ├── ARCHITECTURE.md       # Proje mimarisi ve eğitim notları
 ├── DISCLAIMER.md         # Yasal sorumluluk reddi metni
@@ -53,6 +56,8 @@ Diosint/
 ├── modules/              # İstihbarat modülleri
 │   ├── username_lookup.py
 │   ├── ip_lookup.py
+│   ├── subdomain_recon.py
+│   ├── metadata_extractor.py
 │   ├── scraper.py
 │   ├── email_osint.py
 │   ├── phone_lookup.py

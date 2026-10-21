@@ -43,6 +43,8 @@ from modules.phone_lookup import analyze_phone
 from modules.darkweb import search_darkweb
 from modules.geoint import lookup_coords
 from modules.scraper import scrape_target
+from modules.subdomain_recon import discover_subdomains
+from modules.metadata_extractor import extract_metadata
 from utils.output_handler import save_report
 from config import REPORTS_DIR
 
@@ -95,7 +97,7 @@ def render_menu():
     menu_content.append(" [8] ", style="bold #d946ef")
     menu_content.append("Discord / Server Invite  ", style="white")
     menu_content.append(" [13] ", style="bold #d946ef")
-    menu_content.append("Rapor Arşivi\n", style="white")
+    menu_content.append("Subdomain Recon (crt.sh)\n", style="white")
 
     # 4. Satır
     menu_content.append(" [4] ", style="bold #d946ef")
@@ -103,13 +105,19 @@ def render_menu():
     menu_content.append(" [9] ", style="bold #d946ef")
     menu_content.append("Site Robots & Security   ", style="white")
     menu_content.append(" [14] ", style="bold #d946ef")
-    menu_content.append("CyberNotes Kılavuz\n\n", style="white")
+    menu_content.append("EXIF / Image Forensic\n", style="white")
 
     # 5. Satır
     menu_content.append(" [5] ", style="bold #d946ef")
     menu_content.append("Toplu İstihbarat Taraması", style="white")
     menu_content.append(" [10] ", style="bold #d946ef")
     menu_content.append("Github Deep Profiler     ", style="white")
+    menu_content.append(" [15] ", style="bold #d946ef")
+    menu_content.append("Rapor Arşivi\n\n", style="white")
+
+    # 6. Satır
+    menu_content.append(" [16] ", style="bold #d946ef")
+    menu_content.append("CyberNotes Kılavuz       ", style="white")
     menu_content.append(" [00] ", style="bold #ef4444")
     menu_content.append("Exit / Çıkış\n", style="bold #ef4444")
 
@@ -398,9 +406,32 @@ def run_geoint():
     save_report(data, "geoint", f"{lat}_{lon}")
 
 
+def run_subdomains():
+    """[13] Certificate Transparency loglarından pasif alt alan adı taraması."""
+    console.print("\n[bold #d946ef]=== [13] PASSIVE SUBDOMAIN RECON (CRT.SH) ===[/bold #d946ef]\n")
+    domain = Prompt.ask("[bold white]Hedef Domain (Örn: example.com)[/bold white]")
+    if not domain:
+        return
+    with console.status("[bold #d946ef]Sertifika kayıtları ve DNS logları taranıyor...[/bold #d946ef]", spinner="dots"):
+        res = asyncio.run(discover_subdomains(domain))
+    save_report(res, "subdomains", domain)
+
+
+def run_exif():
+    """[14] Görsel dosyalarından EXIF ve gömülü GPS koordinatlarını çıkarır."""
+    console.print("\n[bold #d946ef]=== [14] IMAGE & EXIF METADATA FORENSIC ===[/bold #d946ef]\n")
+    path = Prompt.ask("[bold white]Görsel Dosya Yolu (Örn: photo.jpg)[/bold white]")
+    if not path:
+        return
+    clean_path = path.strip("\"'")
+    res = extract_metadata(clean_path)
+    if res.get("exif_found"):
+        save_report(res, "exif_metadata", Path(clean_path).stem)
+
+
 def run_reports():
-    """[13] Oluşturulan HTML ve JSON formatındaki raporları listeler."""
-    console.print("\n[bold #d946ef]=== [13] RAPOR VE İSTİHBARAT ARŞİVİ ===[/bold #d946ef]\n")
+    """[15] Oluşturulan HTML ve JSON formatındaki raporları listeler."""
+    console.print("\n[bold #d946ef]=== [15] RAPOR VE İSTİHBARAT ARŞİVİ ===[/bold #d946ef]\n")
     files = sorted(list(REPORTS_DIR.glob("*.*")), key=os.path.getmtime, reverse=True)
     if not files:
         console.print("[dim]Kayıtlı rapor bulunmuyor.[/dim]\n")
@@ -422,8 +453,8 @@ def run_reports():
 
 
 def run_cybernotes():
-    """[14] Nmap, Metasploit, FFUF ve PrivEsc için pratik komut referansı."""
-    console.print("\n[bold #d946ef]=== [14] CYBERNOTES SİBER GÜVENLİK KILAVUZU ===[/bold #d946ef]\n")
+    """[16] Nmap, Metasploit, FFUF ve PrivEsc için pratik komut referansı."""
+    console.print("\n[bold #d946ef]=== [16] CYBERNOTES SİBER GÜVENLİK KILAVUZU ===[/bold #d946ef]\n")
     console.print("""
 [bold #ec4899]1. NMAP HIZLI VE TAM TARAMA:[/]
    [white]nmap -p- -sS -sV -sC -T4 -Pn <HEDEF_IP> -oA full_scan[/white]
@@ -491,8 +522,12 @@ def main():
         elif choice == "12":
             run_geoint()
         elif choice == "13":
-            run_reports()
+            run_subdomains()
         elif choice == "14":
+            run_exif()
+        elif choice == "15":
+            run_reports()
+        elif choice == "16":
             run_cybernotes()
         else:
             console.print("[red]Geçersiz seçim! Lütfen menüdeki bir numarayı girin.[/red]")

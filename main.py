@@ -44,7 +44,7 @@ app = typer.Typer(
 
 console = Console()
 
-BANNER = """
+BANNER = r"""
 [bold cyan]
  ____  _           _       _   
 |  _ \(_) ___  ___(_)_ __ | |_ 
@@ -241,6 +241,30 @@ def cmd_map(
         export_interactive_html(G, name)
     if output_format in ("png", "both"):
         export_static_graph(G, name)
+
+
+@app.command(name="subdomains", help="crt.sh ve DNS loglarindan pasif subdomain kesfi")
+def cmd_subdomains(
+    target: str = typer.Option(..., "--target", "-t", help="Hedef Domain"),
+    output: str = typer.Option("json", "--output", "-o", help="Cikti formati"),
+):
+    print_banner()
+    from modules.subdomain_recon import discover_subdomains
+    result = asyncio.run(discover_subdomains(target))
+    if output != "none":
+        _save_and_notify(result, "subdomains", target, output)
+
+
+@app.command(name="exif", help="Gorsel dosyasindan EXIF ve GPS cikarimi")
+def cmd_exif(
+    file: Path = typer.Option(..., "--file", "-f", help="Gorsel dosya yolu"),
+    output: str = typer.Option("json", "--output", "-o", help="Cikti formati"),
+):
+    print_banner()
+    from modules.metadata_extractor import extract_metadata
+    result = extract_metadata(file)
+    if output != "none" and result.get("exif_found"):
+        _save_and_notify(result, "exif", file.stem, output)
 
 
 @app.command(name="clean", help="Rapor klasorunu temizle")
