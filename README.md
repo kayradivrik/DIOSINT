@@ -1,158 +1,118 @@
-<div align="center">
+# DIOSINT
 
-# 🛡️ DIOSINT
-### Next-Gen Cyber Intelligence & OSINT Reconnaissance Framework
+Fast, asynchronous OSINT reconnaissance framework for passive information gathering across usernames, IPs, domains, subdomains, emails, and media metadata.
 
-[![Python Version](https://img.shields.io/badge/python-3.10%2B-blue.svg?style=for-the-badge&logo=python)](https://www.python.org/)
-[![License](https://img.shields.io/badge/License-MIT-green.svg?style=for-the-badge)](LICENSE)
-[![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20Linux%20%7C%20macOS-purple.svg?style=for-the-badge)](https://github.com)
-[![Status](https://img.shields.io/badge/Status-Active%20Development-orange.svg?style=for-the-badge)]()
-
-*Diosint, modern siber güvenlik araştırmacıları ve analistler için tasarlanmış asenkron, zengin arayüzlü ve modüler bir Açık Kaynak İstihbaratı (OSINT) platformudur.*
-
-</div>
-
----
-
-> [!WARNING]
-> **YASAL UYARI / LEGAL DISCLAIMER:**  
-> Bu araç **yalnızca eğitim, savunma ve yetkili güvenlik araştırmaları** için tasarlanmıştır. İzniniz olmayan sistemler üzerinde kullanılması yasa dışıdır. Detaylar için lütfen [DISCLAIMER.md](DISCLAIMER.md) dosyasını inceleyin.
-
----
-
-## ✨ Özellikler (Key Capabilities)
-
-- 🔍 **Username Reconnaissance:** 40'tan fazla popüler platformda eş zamanlı (asenkron `httpx`) profil varlığı tespiti ve GitHub API derin profillemesi.
-- 🌐 **IP & Network Intelligence:** IP geolocation, Autonomous System (ASN), ISP, PTR ters DNS ve proxy/barındırma tespiti.
-- 🔐 **Passive Subdomain Discovery:** `crt.sh` (Certificate Transparency) ve DNS loglarından hedef sunucuya dokunmadan pasif alt alan adı tespiti.
-- 🖼️ **Image & EXIF Forensic:** Fotoğraflardan cihaz bilgisi, lens parametreleri, yazılım ve gömülü GPS koordinatlarını çözümleme.
-- 📧 **Email & Breach Intelligence:** RFC 5322 e-posta doğrulaması, MX kayıt denetimi ve HaveIBeenPwned API sızıntı sorgulaması.
-- 🕷️ **Asynchronous Web Scraper:** CMS, sunucu, kütüphaneler, OpenGraph metadataları, güvenlik başlıkları analizi (HSTS, CSP, X-Frame-Options) ve link haritalama.
-- 🧅 **Tor & Dark Web Intelligence:** Ahmia motoru üzerinden kamuya açık `.onion` arama ve indeksleme.
-- 📍 **GEOINT (Coğrafi İstihbarat):** OpenStreetMap / Nominatim API ile enlem/boylam koordinatlarından adres çözümleme ve Google Haritalar/Uydu linkleme.
-- 📊 **Veri İlişkilendirme & Görselleştirme:** Toplanan verilerden `NetworkX` ile düğüm-kenar ilişkisi kurma ve `PyVis` ile interaktif HTML ağ grafikleri oluşturma.
-- 📁 **Raporlama Motoru:** Çıktıları otomatik olarak temiz JSON, CSV ve CSS gömülü modern HTML raporları olarak kaydetme.
-- 💻 **İki Farklı Çalışma Modu:**
-  1. **İnteraktif Terminal Arayüzü (TUI):** Neon mor/pembe Rich konsolu (`terminal_app.py` veya `diosint.bat`).
-  2. **Otomasyon & CLI:** CI/CD ve script otomasyonları için Typer tabanlı komut satırı arayüzü (`main.py`).
-
----
-
-## 📁 Proje Dizin Yapısı
+Built with Python, `httpx`, and `rich`. Includes an interactive cyberpunk terminal UI and a standalone CLI.
 
 ```
-Diosint/
-├── terminal_app.py       # Zengin Rich neon interaktif menü konsolu
-├── main.py               # Typer tabanlı CLI otomasyon arayüzü
-├── diosint.bat           # Windows kullanıcıları için çift tıkla-çalıştır başlatıcısı
-├── config.py             # Merkezi konfigürasyon ve platform tanımları
-├── requirements.txt      # Gerekli bağımlılıklar
-├── Dockerfile            # Containerize çalıştırma desteği
-├── .env.example          # Örnek API anahtar şablonu
-├── ARCHITECTURE.md       # Proje mimarisi ve eğitim notları
-├── DISCLAIMER.md         # Yasal sorumluluk reddi metni
-├── LICENSE               # MIT Açık Kaynak Lisansı
-│
-├── modules/              # İstihbarat modülleri
-│   ├── username_lookup.py
-│   ├── ip_lookup.py
-│   ├── subdomain_recon.py
-│   ├── metadata_extractor.py
-│   ├── scraper.py
-│   ├── email_osint.py
-│   ├── phone_lookup.py
-│   ├── darkweb.py
-│   ├── geoint.py
-│   └── network_mapper.py
-│
-├── api_clients/          # Harici API istemcileri
-│   ├── shodan_client.py
-│   └── virustotal_client.py
-│
-├── utils/                # Yardımcı araçlar (Rate limiter, proxy, raporlama)
-└── reports/              # Üretilen HTML/JSON raporlar (.gitkeep)
+ ██████╗ ██╗ ██████╗ ███████╗██╗███╗   ██╗████████╗
+ ██╔══██╗██║██╔═══██╗██╔════╝██║████╗  ██║╚══██╔══╝
+ ██║  ██║██║██║   ██║███████╗██║██╔██╗ ██║   ██║   
+ ██║  ██║██║██║   ██║╚════██║██║██║╚██╗██║   ██║   
+ ██████╔╝██║╚██████╔╝███████║██║██║ ╚████║   ██║   
+ ╚═════╝ ╚═╝ ╚═════╝ ╚══════╝╚═╝╚═╝  ╚═══╝   ╚═╝   
 ```
 
 ---
 
-## 🚀 Hızlı Başlangıç (Kurulum)
+## Features
 
-### 1. Depoyu Klonlayın
+- **Username Recon:** Queries 40+ platforms asynchronously via `httpx` with detailed GitHub profile extraction.
+- **Subdomain Discovery:** Passive enumeration using Certificate Transparency (`crt.sh`) logs without sending traffic to the target domain.
+- **IP & Network Intel:** Geolocation, ASN, ISP, organization, PTR reverse DNS, and proxy/hosting detection.
+- **EXIF Forensics:** Extracts metadata, camera specs, software, and embedded GPS coordinates (with direct Google Maps links) from image files.
+- **Email OSINT:** RFC 5322 syntax validation, MX record verification, and breach detection via HaveIBeenPwned API.
+- **Web Recon:** Scrapes web technologies (CMS, libraries, frameworks), analyzes HTTP security headers (HSTS, CSP, X-Frame-Options), and maps links.
+- **Tor / Dark Web:** Queries Ahmia.fi index for `.onion` services.
+- **GEOINT:** Reverse geocodes coordinates to street addresses using OpenStreetMap Nominatim.
+- **Relation Mapping:** Builds node-edge entity graphs using NetworkX and exports interactive HTML charts (pyvis).
+- **Automated Reporting:** Generates clean HTML executive reports and raw JSON data.
+
+---
+
+## Installation
+
+### Standard Setup
+
 ```bash
-git clone https://github.com/KULLANICI_ADINIZ/diosint.git
-cd diosint
-```
+git clone https://github.com/kayradivrik/DIOSINT.git
+cd DIOSINT
 
-### 2. Sanal Ortam Oluşturun & Bağımlılıkları Yükleyin
-```bash
-# Sanal ortam oluşturma
 python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
 
-# Aktifleştirme (Windows)
-venv\Scripts\activate
-
-# Aktifleştirme (Linux / macOS)
-source venv/bin/activate
-
-# Kütüphaneleri kurun
 pip install -r requirements.txt
 ```
 
-### 3. API Anahtarlarını Ayarlayın (Opsiyonel)
+### Docker
+
 ```bash
-# Örnek .env dosyasını kopyalayın
-copy .env.example .env    # Windows
-cp .env.example .env      # Linux/macOS
+docker build -t diosint .
+docker run -it diosint
 ```
-`.env` dosyasını açıp Shodan, VirusTotal veya HaveIBeenPwned API anahtarlarınızı isteğe bağlı olarak ekleyin.
 
 ---
 
-## 🎮 Kullanım
+## Configuration (Optional)
 
-### Seçenek A: İnteraktif Konsol (Tavsiye Edilen)
-Windows'ta `diosint.bat` dosyasına çift tıklayabilir veya terminalden çalıştırabilirsiniz:
+Copy `.env.example` to `.env` if you want to use Shodan, VirusTotal, or Tor proxying:
+
+```bash
+cp .env.example .env    # Windows: copy .env.example .env
+```
+
+```ini
+SHODAN_API_KEY=your_key_here
+VIRUSTOTAL_API_KEY=your_key_here
+HIBP_API_KEY=your_key_here
+USE_TOR=false
+```
+
+---
+
+## Usage
+
+### 1. Interactive Terminal Console (Recommended)
+
+Run the menu-driven console with Rich formatting:
+
 ```bash
 python terminal_app.py
 ```
+*(On Windows you can also double-click `diosint.bat`)*
 
-### Seçenek B: Komut Satırı (CLI)
+### 2. Command Line (CLI)
+
+Run specific reconnaissance modules directly:
+
 ```bash
-# Kullanıcı adı profilleme
-python main.py username --target johndoe --output json
+# Username lookup
+python main.py username --target johndoe
 
-# IP ve altyapı istihbaratı
+# IP intelligence
 python main.py ip --target 1.1.1.1 --shodan
 
-# E-posta ve sızıntı kontrolü
-python main.py email --target target@example.com
+# Passive subdomain discovery
+python main.py subdomains --target example.com
 
-# Web sitesi teknoloji ve güvenlik taraması
+# Image EXIF analysis
+python main.py exif --file evidence.jpg
+
+# Web technology & header audit
 python main.py scrape --target https://example.com
 
-# Koordinattan adres çözümleme (GEOINT)
-python main.py geoint --lat 41.0082 --lon 28.9784
+# Email breach check
+python main.py email --target user@domain.com
 ```
 
----
-
-## 🔒 Güvenlik & Gizlilik
-
-- **API Anahtarları:** `.env` dosyası varsayılan olarak `.gitignore` içerisindedir ve asla Git deposuna gönderilmez.
-- **Proxy & Tor Desteği:** `utils/proxy_manager.py` ile anonim istek göndermek için yerel Tor servisi (`socks5h://127.0.0.1:9050`) veya `proxies.txt` listesi kullanılabilir.
-- **Veri Saklama:** Oluşturulan tarama raporları yerel `reports/` klasöründe tutulur ve Git deposuna gönderilmez.
+All reports are saved under the `reports/` directory.
 
 ---
 
-## 👨‍💻 Geliştirici & Yazar (Author)
+## Legal Disclaimer
 
-**Kayra Divrik**  
-- GitHub: [@kayradivrik](https://github.com/kayradivrik) *(veya profil linkiniz)*  
-- Proje: **Diosint OSINT & Cyber Reconnaissance Framework**
+This tool is created for educational purposes, security auditing, and authorized penetration testing only. Do not use this tool against any system without explicit prior permission. The author assumes no liability for misuse.
 
----
+## License
 
-## 📜 Lisans & Yasal Sorumluluk
-
-Bu proje **Kayra Divrik** telif hakkı altında [MIT Lisansı](LICENSE) kapsamında açık kaynak olarak sunulmuştur.  
-Kullanıcılar, yazılımı kullanırken yürürlükteki tüm yasalara (TCK Madde 243-244, KVKK, GDPR) uymakla yükümlüdür. Ayrıntılar için [DISCLAIMER.md](DISCLAIMER.md) belgesini okuyunuz.
+[MIT](LICENSE) © 2026 Kayra Divrik
